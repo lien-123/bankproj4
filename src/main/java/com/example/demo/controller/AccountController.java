@@ -23,17 +23,16 @@ public class AccountController {
     @GetMapping("/accounts/")
     public ResponseEntity<?> getAccounts() {
 
-        // 取得 TokenFilter 放進來的登入使用者
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth == null || auth.getPrincipal() == "anonymousUser") {
+        // ←← 最正確的判斷方式
+        if (auth == null || !(auth.getPrincipal() instanceof User)) {
             return ResponseEntity.status(401)
                     .body(Map.of("detail", "Authentication credentials were not provided."));
         }
 
         User currentUser = (User) auth.getPrincipal();
 
-        // 查詢該 user 所有帳戶（回傳 List，可以一人多帳戶）
         List<Account> accounts = accountRepo.findByUserId(currentUser.getId());
 
         return ResponseEntity.ok(accounts);

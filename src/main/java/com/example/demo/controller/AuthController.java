@@ -29,9 +29,10 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /** -------------------------
-     *  登入：比對 BCrypt 密碼
-     * -------------------------- */
+
+    /** --------------------------------
+     *  登入：比對密碼 → 產生 Token
+     * -------------------------------- */
     @PostMapping("/login/")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
 
@@ -50,29 +51,42 @@ public class AuthController {
         tokenRepo.save(token);
 
         return ResponseEntity.ok(
-                Map.of("detail", "login success", "token", tokenStr));
+                Map.of("detail", "login success", "token", tokenStr)
+        );
     }
 
-    /** -------------------------
-     *  登出：刪除 Token（利用 TokenFilter 提供的 user）
-     * -------------------------- */
-    @PostMapping("/logout/")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
 
+    /** --------------------------------
+     *  登出：刪除 Token（需已登入）
+     * -------------------------------- */
+    @PostMapping("/logout/")
+    public ResponseEntity<?> logout(
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+
+        // 沒帶 Token
+        if (authHeader == null || authHeader.isEmpty()) {
+            return ResponseEntity.status(401).body(
+                    Map.of("detail", "Authentication credentials were not provided.")
+            );
+        }
+
+        // 格式錯誤
         if (!authHeader.startsWith("Token ")) {
             return ResponseEntity.badRequest()
                     .body(Map.of("detail", "invalid token format"));
         }
 
         String tokenValue = authHeader.substring(6);
-
         AuthToken token = tokenRepo.findByToken(tokenValue);
 
+        // Token 不存在
         if (token == null) {
             return ResponseEntity.badRequest()
                     .body(Map.of("detail", "invalid token"));
         }
 
+        // 刪除 Token 完成登出
         tokenRepo.delete(token);
 
         return ResponseEntity.ok(Map.of("detail", "logout success"));

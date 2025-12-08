@@ -28,26 +28,23 @@ public class TransactionController {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth == null || auth.getPrincipal() == "anonymousUser") {
+        // ✔ 最正確、最安全的登入判斷
+        if (auth == null || !(auth.getPrincipal() instanceof User)) {
             return ResponseEntity.status(401)
                     .body(Map.of("detail", "Authentication credentials were not provided."));
         }
 
         User currentUser = (User) auth.getPrincipal();
 
-        // 取得所有使用者帳戶
+        // 取得使用者帳戶
         List<Account> accounts = accountRepo.findByUserId(currentUser.getId());
         List<String> accountNos = accounts.stream()
                 .map(Account::getAccountNumber)
                 .collect(Collectors.toList());
 
-        // 取得所有交易紀錄（出帳 + 入帳）
-        List<Transaction> allTx = new ArrayList<>();
-        for (String acc : accountNos) {
-            allTx.addAll(txRepo.findBySenderAccountOrReceiverAccount(acc, acc));
-        }
+        // 🔥 改成一次查詢所有交易紀錄（需你在 repo 新增 findByAccounts）
+        List<Transaction> allTx = txRepo.findByAccounts(accountNos);
 
-        // 組成與 Django 一樣的輸出格式
         List<Map<String, Object>> result = allTx.stream()
                 .map(tx -> {
                     Map<String, Object> map = new HashMap<>();
@@ -62,6 +59,8 @@ public class TransactionController {
 
                     return map;
                 })
+                .sorted((a, b) ->
+                        b.get("completed_at").toString().compareTo(a.get("completed_at").toString()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(result);

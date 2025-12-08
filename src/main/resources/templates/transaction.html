@@ -7,8 +7,7 @@
 </div>
 
 <script>
-/* ========= 載入交易紀錄 ========= */
-async function loadTransaction() {
+async function loadTransactions() {
   const token = localStorage.getItem('token');
 
   try {
@@ -21,7 +20,7 @@ async function loadTransaction() {
     const transactions = await res.json();
     const list = document.getElementById("transactionList");
 
-    list.innerHTML = ""; // 清空列表
+    list.innerHTML = "";
 
     transactions.forEach(tr => {
       const card = document.createElement("div");
@@ -49,9 +48,4 @@ async function loadTransaction() {
     console.error(err);
   }
 }
-</script>
-
-<script>
-/* 進入頁面後自動載入交易紀錄 */
-loadTransaction();
 </script>

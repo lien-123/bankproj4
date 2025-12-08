@@ -8,7 +8,7 @@
   <input type="number" id="amount" placeholder="請輸入金額">
 
   <div class="registeredButtons">
-    <button class="cancel" type="button" onclick="loadMenu()">取消</button>
+    <button class="cancel" type="button" onclick="loadPage('/menu/')">取消</button>
     <button class="transfer" type="button" onclick="doTransfer()">轉帳</button>
   </div>
 
@@ -18,19 +18,32 @@
 <script>
 /* =========（修正）載入收款人列表 ========= */
 async function loadPayees() {
+  console.log("loadPayees() 被執行了");
+
   const token = localStorage.getItem("token");
+  console.log("目前的 token =", token);
 
   try {
+    console.log("執行 fetch...");
     const res = await fetch("/api/payees/", {
       headers: { "Authorization": `Token ${token}` }
     });
 
-    if (!res.ok) throw new Error("取得收款人失敗");
+    console.log("收到 response:", res.status);
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("後端錯誤內容：", text);
+      alert("無法取得收款人列表");
+      return;
+    }
 
     const payees = await res.json();
-    const payeeSelect = document.getElementById("payee");
+    console.log("解析到 payees:", payees);
 
-    // 清空列表避免重複
+    const payeeSelect = document.getElementById("payee");
+    console.log("document.getElementById('payee') =", payeeSelect);
+
     payeeSelect.innerHTML = `<option value="">請選擇約定帳號</option>`;
 
     payees.forEach(p => {
@@ -40,11 +53,14 @@ async function loadPayees() {
       payeeSelect.appendChild(option);
     });
 
+    console.log("收款人列表載入完成");
+
   } catch (err) {
+    console.error("loadPayees() 發生 JS 錯誤：", err);
     alert("無法取得收款人列表");
-    console.error(err);
   }
 }
+
 </script>
 
 <script>

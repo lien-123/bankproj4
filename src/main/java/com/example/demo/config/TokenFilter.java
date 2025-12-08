@@ -10,12 +10,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collections;
 
 @Component
 public class TokenFilter extends OncePerRequestFilter {
@@ -36,18 +37,28 @@ public class TokenFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Token ")) {
-            String tokenValue = authHeader.substring(6);
 
+            String tokenValue = authHeader.substring(6);
             AuthToken token = tokenRepo.findByToken(tokenValue);
 
             if (token != null) {
                 User user = userRepo.findById(token.getUserId()).orElse(null);
 
                 if (user != null) {
+                    // 🚀 給一個基本角色，避免 Spring 視為未登入
+                    var authorities = Collections.singletonList(
+                            new SimpleGrantedAuthority("ROLE_USER")
+                    );
+
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(
-                                    user, null, List.of()
+                                    user,
+                                    null,
+                                    authorities
                             );
+
+                    authentication.setDetails(user);
+
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
@@ -56,4 +67,3 @@ public class TokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-

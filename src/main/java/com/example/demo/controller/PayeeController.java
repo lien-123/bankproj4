@@ -25,8 +25,8 @@ public class PayeeController {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // 未登入（Token 無效 / 沒附 Token）
-        if (auth == null || auth.getPrincipal() == "anonymousUser") {
+        // ✔ 最安全：只能接受 User 物件
+        if (auth == null || !(auth.getPrincipal() instanceof User)) {
             return ResponseEntity.status(401)
                     .body(Map.of("detail", "Authentication credentials were not provided."));
         }

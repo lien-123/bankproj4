@@ -28,37 +28,34 @@ public class TransferController {
     @Autowired
     private TransactionRepository txRepo;
 
-    /** -----------------------------
-     *   轉帳 API（使用 TokenFilter）
-     * ----------------------------- */
     @PostMapping("/transfer/")
     @Transactional
     public ResponseEntity<?> transfer(@RequestBody TransferRequest req) {
 
-        // 取得目前登入的 User（由 TokenFilter 設定）
+        // ✔ 最安全、永不誤判的登入檢查
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getPrincipal() == "anonymousUser") {
+        if (auth == null || !(auth.getPrincipal() instanceof User)) {
             return ResponseEntity.status(401)
                     .body(Map.of("detail", "Authentication credentials were not provided."));
         }
 
         User currentUser = (User) auth.getPrincipal();
 
-        // 1️⃣ 查詢轉出帳戶（必須是自己的）
+        // 1️⃣ 查詢轉出帳戶
         Account sender = accountRepo.findById(req.getFrom_account_id()).orElse(null);
         if (sender == null || !sender.getUserId().equals(currentUser.getId())) {
             return ResponseEntity.badRequest()
                     .body(Map.of("detail", "Sender account not found or does not belong to you"));
         }
 
-        // 2️⃣ 查詢 Payee（必須是自己的常用收款人）
+        // 2️⃣ 查詢 Payee
         Payee payee = payeeRepo.findById(req.getPayee_id()).orElse(null);
         if (payee == null || !payee.getUserId().equals(currentUser.getId())) {
             return ResponseEntity.badRequest()
                     .body(Map.of("detail", "Payee not found or does not belong to you"));
         }
 
-        // 3️⃣ 查詢 Receiver 的 Account（Payee 指向的帳戶）
+        // 3️⃣ 找 Receiver 帳戶
         Account receiver = accountRepo.findByAccountNumber(payee.getAccountNumber());
         if (receiver == null) {
             return ResponseEntity.badRequest()
@@ -72,24 +69,22 @@ public class TransferController {
                     .body(Map.of("detail", "Insufficient balance"));
         }
 
-        // 5️⃣ 執行轉帳（原子性）
+        // 5️⃣ 執行轉帳
         sender.setBalance(sender.getBalance().subtract(amount));
         receiver.setBalance(receiver.getBalance().add(amount));
-
         accountRepo.save(sender);
         accountRepo.save(receiver);
 
-        // 6️⃣ 紀錄交易
+        // 6️⃣ 建立交易紀錄
         Transaction tx = new Transaction();
         tx.setSenderAccount(sender.getAccountNumber());
         tx.setReceiverAccount(receiver.getAccountNumber());
         tx.setAmount(amount);
         tx.setNote("轉帳給 " + payee.getName());
         tx.setCompletedAt(LocalDateTime.now());
-
         txRepo.save(tx);
 
-        // 7️⃣ 回傳與 Django 一樣格式
+        // 7️⃣ 回傳成功資訊
         return ResponseEntity.ok(Map.of(
                 "detail", "transfer success",
                 "new_balance", sender.getBalance()

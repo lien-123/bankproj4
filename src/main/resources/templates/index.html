@@ -16,24 +16,35 @@
    通用頁面載入：支援子頁面 <script> 正常執行
    ============================================================ */
 function loadPage(url, callback) {
+  console.log("Loading page:", url);
+
   fetch(url)
     .then(res => res.text())
     .then(html => {
       const app = document.getElementById("app");
-      app.innerHTML = html;
+      app.innerHTML = "";
 
-      // 重新執行子頁面的 <script>
-      const scripts = app.querySelectorAll("script");
-      scripts.forEach(oldScript => {
+      const temp = document.createElement("div");
+      temp.innerHTML = html;
+
+      const scripts = temp.querySelectorAll("script");
+      scripts.forEach(s => s.remove());
+
+      app.append(...temp.childNodes);
+
+      scripts.forEach(s => {
         const newScript = document.createElement("script");
-        if (oldScript.src) newScript.src = oldScript.src;
-        else newScript.textContent = oldScript.textContent;
-        document.body.appendChild(newScript);
+        if (s.src) newScript.src = s.src;
+        else newScript.textContent = s.textContent;
+
+        // 🔥 要放在 app 裡面，不能是 body！
+        app.appendChild(newScript);
       });
 
-      if (callback) callback(); // 例如 transfer 頁面需要 loadPayees()
+      if (callback) callback();
     });
 }
+
 
 /* ============================================================
    登入畫面
@@ -86,17 +97,21 @@ function loadBalance() {
 }
 
 function loadTransaction() {
-  loadPage('/transaction/');
-}
-
-function loadTransfer() {
-  // ⚠️ transfer 頁面載完後要自動執行 loadPayees()
-  loadPage('/transfer/', () => {
-    if (typeof loadPayees === "function") {
-      loadPayees();
+  loadPage('/transaction/', () => {
+    if (typeof loadTransactions === "function") {
+      loadTransactions();
     }
   });
 }
+
+
+function loadTransfer() {
+  loadPage('/transfer/', () => {
+    // 這個頁面只有按鈕，不要載入收款人！
+  });
+}
+
+
 
 /* ============================================================
    登出

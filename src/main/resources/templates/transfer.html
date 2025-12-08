@@ -1,33 +1,21 @@
 <div class="transferContainer">
   <h2>請選擇轉帳類型</h2>
 
-  <!-- 約定轉帳（載入約定帳號頁面） -->
-  <button class="Registered" onclick="loadPage('/register/')">約定轉帳</button>
+  <!-- 約定轉帳（載入 register.html，並自動取得收款人列表） -->
+  <button class="Registered" onclick="loadRegisterPage()">約定轉帳</button>
 
-  <!-- 非約定轉帳（尚未製作，下方示範跳到通知） -->
+  <!-- 非約定轉帳（未製作） -->
   <button class="nonRegistered" onclick="loadPage('/notification/')">非約定轉帳</button>
 </div>
 
-<!-- 回主選單 -->
 <button class="backToMenu" onclick="loadMenu()">回選單</button>
 
 <script>
-/* ======== SPA 專用：載入約定轉帳頁面 ======== */
-function loadRegisterTransfer() {
-  fetch("/register/")
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById("app").innerHTML = html;
-    });
-}
-
-/* ======== SPA 專用：載入未約定轉帳（還沒正式做） ======== */
-function loadNonRegistered() {
-  // ⚠️ 只是示範，未來你會做一個輸入帳號 + 金額頁面
-  fetch("/notification/")
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById("app").innerHTML = html;
-    });
+function loadRegisterPage() {
+  loadPage('/register/', () => {
+    if (typeof loadPayees === "function") {
+      loadPayees(); // <-- 這裡才正確！
+    }
+  });
 }
 </script>
