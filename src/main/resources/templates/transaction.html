@@ -1,0 +1,57 @@
+<div class="recordContainer">
+  <h2>交易紀錄</h2>
+
+  <div id="transactionList" class="transactionList"></div>
+
+  <button class="balanceButton" onclick="loadPage('/menu/')">回選單</button>
+</div>
+
+<script>
+/* ========= 載入交易紀錄 ========= */
+async function loadTransaction() {
+  const token = localStorage.getItem('token');
+
+  try {
+    const res = await fetch("/api/transactions/", {
+      headers: { "Authorization": `Token ${token}` }
+    });
+
+    if (!res.ok) throw new Error("無法取得交易紀錄");
+
+    const transactions = await res.json();
+    const list = document.getElementById("transactionList");
+
+    list.innerHTML = ""; // 清空列表
+
+    transactions.forEach(tr => {
+      const card = document.createElement("div");
+      card.className = "transactionCard";
+
+      const date = new Date(tr.completed_at).toLocaleString();
+      const amount = Number(tr.amount);
+
+      card.innerHTML = `
+        <div class="left">
+          <div class="item">${tr.note || tr.to_account_owner_name}</div>
+          <div class="date">${date}</div>
+        </div>
+
+        <div class="amount ${amount < 0 ? 'minus' : 'plus'}">
+          ${amount < 0 ? '' : '+'}${amount.toLocaleString()}
+        </div>
+      `;
+
+      list.appendChild(card);
+    });
+
+  } catch (err) {
+    alert("登入已過期，請重新登入");
+    console.error(err);
+  }
+}
+</script>
+
+<script>
+/* 進入頁面後自動載入交易紀錄 */
+loadTransaction();
+</script>

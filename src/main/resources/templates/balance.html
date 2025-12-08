@@ -1,0 +1,39 @@
+<div class="balanceContainer">
+  <h2>用戶餘額</h2>
+
+  <div class="balanceAmount" id="balance">
+    NT$ 0
+  </div>
+
+  <button class="balanceButton" onclick="loadMenu()">回選單</button>
+</div>
+
+<script>
+console.log("balance script loaded！");
+(function loadBalanceData() {
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    alert("尚未登入");
+    showLogin();
+    return;
+  }
+
+  fetch("/api/accounts/", {
+    headers: { "Authorization": `Token ${token}` }
+  })
+    .then(response => {
+      if (!response.ok) throw new Error("抓取餘額失敗");
+      return response.json();
+    })
+    .then(data => {
+      const balance = parseFloat(data[0].balance);
+      document.getElementById("balance").innerText =
+        "NT$ " + balance.toLocaleString();
+    })
+    .catch(error => {
+      alert("抓取餘額失敗，請重新登入");
+      showLogin();
+    });
+})();
+</script>

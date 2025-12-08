@@ -1,0 +1,94 @@
+<div class="registeredContainer">
+  <h2>約定轉帳</h2>
+
+  <select id="payee" class="payeeSelect">
+    <option value="">請選擇約定帳號</option>
+  </select>
+
+  <input type="number" id="amount" placeholder="請輸入金額">
+
+  <div class="registeredButtons">
+    <button class="cancel" type="button" onclick="loadMenu()">取消</button>
+    <button class="transfer" type="button" onclick="doTransfer()">轉帳</button>
+  </div>
+
+  <button class="backToMenu" onclick="loadMenu()">回選單</button>
+</div>
+
+<script>
+/* =========（修正）載入收款人列表 ========= */
+async function loadPayees() {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch("/api/payees/", {
+      headers: { "Authorization": `Token ${token}` }
+    });
+
+    if (!res.ok) throw new Error("取得收款人失敗");
+
+    const payees = await res.json();
+    const payeeSelect = document.getElementById("payee");
+
+    // 清空列表避免重複
+    payeeSelect.innerHTML = `<option value="">請選擇約定帳號</option>`;
+
+    payees.forEach(p => {
+      const option = document.createElement("option");
+      option.value = p.id;
+      option.text = `${p.name}（${p.accountNumber}）`;
+      payeeSelect.appendChild(option);
+    });
+
+  } catch (err) {
+    alert("無法取得收款人列表");
+    console.error(err);
+  }
+}
+</script>
+
+<script>
+/* ========= 轉帳功能 ========= */
+async function doTransfer() {
+  const token = localStorage.getItem("token");
+  const payee_id = document.getElementById("payee").value;
+  const amount = Number(document.getElementById("amount").value);
+
+  if (!payee_id) return alert("請選擇收款人");
+  if (!amount || amount <= 0) return alert("請輸入正確金額");
+
+  try {
+    const response = await fetch("/api/transfer/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`
+      },
+      body: JSON.stringify({
+        payee_id: payee_id,
+        amount: amount,
+        from_account_id: 1
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(`轉帳成功！新餘額：NT$ ${Number(data.new_balance).toLocaleString()}`);
+      loadMenu();
+    } else {
+      alert(`轉帳失敗：${data.detail}`);
+    }
+
+  } catch (error) {
+    alert("無法連線到伺服器");
+    console.error(error);
+  }
+}
+</script>
+
+<script>
+/* =========（修正）頁面載入時啟動 loadPayees() ========= */
+console.log("register page loaded");
+loadPayees();
+</script>
