@@ -30,9 +30,6 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
 
-    /** --------------------------------
-     *  登入：比對密碼 → 產生 Token
-     * -------------------------------- */
     @PostMapping("/login/")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
 
@@ -55,10 +52,6 @@ public class AuthController {
         );
     }
 
-
-    /** --------------------------------
-     *  登出：刪除 Token（需已登入）
-     * -------------------------------- */
     @PostMapping("/logout/")
     public ResponseEntity<?> logout(
             @RequestHeader(value = "Authorization", required = false) String authHeader

@@ -7,12 +7,10 @@
 
   <button class="balanceButton" onclick="loadMenu()">回選單</button>
 </div>
-
 <script>
 console.log("balance script loaded！");
 (function loadBalanceData() {
   const token = localStorage.getItem('token');
-
   if (!token) {
     alert("尚未登入");
     showLogin();

@@ -3,13 +3,11 @@ package com.example.demo.controller;
 import com.example.demo.entity.Account;
 import com.example.demo.entity.User;
 import com.example.demo.repository.AccountRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +23,6 @@ public class AccountController {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // ←← 最正確的判斷方式
         if (auth == null || !(auth.getPrincipal() instanceof User)) {
             return ResponseEntity.status(401)
                     .body(Map.of("detail", "Authentication credentials were not provided."));

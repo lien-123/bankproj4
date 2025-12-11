@@ -28,7 +28,7 @@ public class TransactionController {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // ✔ 最正確、最安全的登入判斷
+        //登入判斷
         if (auth == null || !(auth.getPrincipal() instanceof User)) {
             return ResponseEntity.status(401)
                     .body(Map.of("detail", "Authentication credentials were not provided."));
@@ -42,7 +42,6 @@ public class TransactionController {
                 .map(Account::getAccountNumber)
                 .collect(Collectors.toList());
 
-        // 🔥 改成一次查詢所有交易紀錄（需你在 repo 新增 findByAccounts）
         List<Transaction> allTx = txRepo.findByAccounts(accountNos);
 
         List<Map<String, Object>> result = allTx.stream()

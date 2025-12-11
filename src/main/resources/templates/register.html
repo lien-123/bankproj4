@@ -16,7 +16,6 @@
 </div>
 
 <script>
-/* =========（修正）載入收款人列表 ========= */
 async function loadPayees() {
   console.log("loadPayees() 被執行了");
 
@@ -64,7 +63,6 @@ async function loadPayees() {
 </script>
 
 <script>
-/* ========= 轉帳功能 ========= */
 async function doTransfer() {
   const token = localStorage.getItem("token");
   const payee_id = document.getElementById("payee").value;
@@ -104,7 +102,6 @@ async function doTransfer() {
 </script>
 
 <script>
-/* =========（修正）頁面載入時啟動 loadPayees() ========= */
 console.log("register page loaded");
 loadPayees();
 </script>

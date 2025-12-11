@@ -1,10 +1,8 @@
 <div class="transferContainer">
   <h2>請選擇轉帳類型</h2>
 
-  <!-- 約定轉帳（載入 register.html，並自動取得收款人列表） -->
   <button class="Registered" onclick="loadRegisterPage()">約定轉帳</button>
 
-  <!-- 非約定轉帳（未製作） -->
   <button class="nonRegistered" onclick="loadPage('/notification/')">非約定轉帳</button>
 </div>
 
@@ -14,7 +12,7 @@
 function loadRegisterPage() {
   loadPage('/register/', () => {
     if (typeof loadPayees === "function") {
-      loadPayees(); // <-- 這裡才正確！
+      loadPayees(); 
     }
   });
 }

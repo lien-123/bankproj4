@@ -7,14 +7,10 @@
 </head>
 <body>
 
-  <!-- 所有畫面都顯示在這個容器 -->
   <div id="app"></div>
 
 <script>
 
-/* ============================================================
-   通用頁面載入：支援子頁面 <script> 正常執行
-   ============================================================ */
 function loadPage(url, callback) {
   console.log("Loading page:", url);
 
@@ -37,7 +33,6 @@ function loadPage(url, callback) {
         if (s.src) newScript.src = s.src;
         else newScript.textContent = s.textContent;
 
-        // 🔥 要放在 app 裡面，不能是 body！
         app.appendChild(newScript);
       });
 
@@ -46,9 +41,6 @@ function loadPage(url, callback) {
 }
 
 
-/* ============================================================
-   登入畫面
-   ============================================================ */
 function showLogin() {
   document.getElementById("app").innerHTML = `
     <div class="loginContainer">
@@ -60,9 +52,6 @@ function showLogin() {
   `;
 }
 
-/* ============================================================
-   登入 API
-   ============================================================ */
 function login() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
@@ -85,9 +74,6 @@ function login() {
     .catch(err => alert("登入失敗：" + err.message));
 }
 
-/* ============================================================
-   主選單與其他頁面載入
-   ============================================================ */
 function loadMenu() {
   loadPage('/menu/');
 }
@@ -107,23 +93,15 @@ function loadTransaction() {
 
 function loadTransfer() {
   loadPage('/transfer/', () => {
-    // 這個頁面只有按鈕，不要載入收款人！
+
   });
 }
 
-
-
-/* ============================================================
-   登出
-   ============================================================ */
 function logout() {
   localStorage.removeItem("token");
   showLogin();
 }
 
-/* ============================================================
-   一開始顯示登入畫面
-   ============================================================ */
 showLogin();
 
 </script>

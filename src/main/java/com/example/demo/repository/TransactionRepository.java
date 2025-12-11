@@ -9,7 +9,6 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
 
-    // 🔥 使用 IN (...) 一次查詢所有帳戶的收付款紀錄
     @Query("SELECT t FROM Transaction t " +
            "WHERE t.senderAccount IN :accounts " +
            "OR t.receiverAccount IN :accounts")

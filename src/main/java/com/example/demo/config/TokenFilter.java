@@ -45,7 +45,6 @@ public class TokenFilter extends OncePerRequestFilter {
                 User user = userRepo.findById(token.getUserId()).orElse(null);
 
                 if (user != null) {
-                    // 🚀 給一個基本角色，避免 Spring 視為未登入
                     var authorities = Collections.singletonList(
                             new SimpleGrantedAuthority("ROLE_USER")
                     );

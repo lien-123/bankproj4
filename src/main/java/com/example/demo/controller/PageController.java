@@ -8,7 +8,7 @@ public class PageController {
 
     @GetMapping("/")
     public String index() {
-        return "index"; // 你那個放 <div id="app"></div> 的頁面
+        return "index"; 
     }
 
     @GetMapping("/menu/")
@@ -33,7 +33,7 @@ public class PageController {
 
     @GetMapping("/register/")
     public String register() {
-        return "register"; // 約定轉帳那頁
+        return "register"; 
     }
 
     @GetMapping("/notification/")

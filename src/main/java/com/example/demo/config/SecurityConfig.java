@@ -17,7 +17,6 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
 
-            // ⭐⭐ 最重要：放行所有 HTML 頁面與 API ⭐⭐
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/index", "/menu/**", "/balance/**",
                         "/transaction/**", "/transfer/**", "/register/**",
@@ -26,13 +25,11 @@ public class SecurityConfig {
                 .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().permitAll()
             )
-
             .formLogin(login -> login.disable())
             .httpBasic(basic -> basic.disable());
 
         return http.build();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
